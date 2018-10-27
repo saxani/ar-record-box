@@ -65,12 +65,14 @@
 </head>
 <body>
 <div id="info">
-  <span class="title">Tap to spawn objects on surfaces.</span><br/>
+  <span class="title">Tap to place your record player on a surface.</span><br/>
 </div>
 <script src="three.js/three.js"></script>
 <script src="three.js/VRControls.js"></script>
 <script src="three.ar.js"></script>
 <script src="wood-box.js"></script>
+<script src="records.js"></script>
+<script src="selector.js"></script>
 <script>
 
 var vrDisplay;
@@ -81,23 +83,14 @@ var canvas;
 var camera;
 var scene;
 var renderer;
-var cube;
 
-var boxGroup;
+var recordBox;
+var woodBox;
+var records;
+var targetList = [];
 
 var directionalLight;
 var light;
-
-var colors = [
-  new THREE.Color( 0xffffff ),
-  new THREE.Color( 0xffff00 ),
-  new THREE.Color( 0xff00ff ),
-  new THREE.Color( 0xff0000 ),
-  new THREE.Color( 0x00ffff ),
-  new THREE.Color( 0x00ff00 ),
-  new THREE.Color( 0x0000ff ),
-  new THREE.Color( 0x000000 )
-];
 
 var BOX_SIZE = 0.2;
 
@@ -158,7 +151,14 @@ function init() {
   scene.add(directionalLight);
 
 
-  boxGroup = boxSetup(BOX_SIZE);
+
+  woodBox = boxSetup(BOX_SIZE);
+  records = addRecords(BOX_SIZE);
+  recordBox = new THREE.Group();
+  recordBox.add(woodBox, records);
+  recordBox.position.set(10000, 10000, 10000);
+  scene.add(recordBox);
+
 
 
   // VRControls is a utility from three.js that applies the device's
@@ -166,36 +166,19 @@ function init() {
   // real world and virtual world in sync.
   vrControls = new THREE.VRControls(camera);
 
-  // Create the cube geometry and add it to the scene. Set the position
-  // to (Infinity, Infinity, Infinity) so that it won't appear visible
-  // until the first hit is found, and move it there
-  var geometry = new THREE.BoxGeometry(BOX_SIZE, BOX_SIZE, BOX_SIZE);
-  var faceIndices = ['a', 'b', 'c'];
-  for (var i = 0; i < geometry.faces.length; i++) {
-    var f  = geometry.faces[i];
-    for (var j = 0; j < 3; j++) {
-      var vertexIndex = f[faceIndices[ j ]];
-      f.vertexColors[j] = colors[vertexIndex];
-    }
-  }
-
   // Shift the cube geometry vertices upwards, so that the "pivot" of
   // the cube is at it's base. When the cube is added to the scene,
   // this will help make it appear to be sitting on top of the real-
   // world surface.
   // geometry.applyMatrix( new THREE.Matrix4().setTranslation( 0, BOX_SIZE / 2, 0 ) );
-  geometry.translate( 0, BOX_SIZE / 2, 0 );
-  var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
-  cube = new THREE.Mesh(geometry, material);
+  // geometry.translate( 0, BOX_SIZE / 2, 0 );
+  // var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+  // cube = new THREE.Mesh(geometry, material);
 
-  // Place the cube very far to initialize
-  cube.position.set(10000, 10000, 10000);
-
-  scene.add(cube);
 
   // Bind our event handlers
   window.addEventListener('resize', onWindowResize, false);
-  canvas.addEventListener('touchstart', onClick, false);
+  canvas.addEventListener('touchstart', createRecordBox, false);
 
   // Kick off the render loop!
   update();
@@ -244,7 +227,7 @@ function onWindowResize () {
  * When clicking on the screen, fire a ray from where the user clicked
  * on the screen and if a hit is found, place a cube there.
  */
-function onClick (e) {
+function createRecordBox (e) {
   // If we don't have a touches object, abort
   // TODO: is this necessary?
   if (!e.touches[0]) {
@@ -266,13 +249,22 @@ function onClick (e) {
     var hit = hits[0];
     // Use the `placeObjectAtHit` utility to position
     // the cube where the hit occurred
-    THREE.ARUtils.placeObjectAtHit(boxGroup,  // The object to place
+    THREE.ARUtils.placeObjectAtHit(recordBox,  // The object to place
                                    hit,   // The VRHit object to move the cube to
                                    1,     // Easing value from 0 to 1; we want to move
                                           // the cube directly to the hit position
                                    true); // Whether or not we also apply orientation
 
+
+  canvas.removeEventListener('touchstart', createRecordBox, false);
+
+  setTimeout(function(){
+    swipedetect();
+  }, 500);
+
   }
+
+
 }
 </script>
 </body>

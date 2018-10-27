@@ -42,8 +42,7 @@ function boxSetup (boxSize) {
 
         boxGroup = new THREE.Group();
         boxGroup.add(side1, side2, side3, side4, side5);
-        boxGroup.position.set(10000, 10000, 10000);
-        scene.add(boxGroup);
+
 
         return boxGroup;
     }
