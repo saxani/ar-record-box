@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Record Box</title>
+
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+              width: 100%;
+              height: 100%;
+              display: block;
+        }
+    </style>
+
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/97/three.min.js"></script>
+<script src="wood-box.js"></script>
+<script src="records.js"></script>
+<script src="selector.js"></script>
+
+<script>
+    // Your 3d scene will always need one of each of these
+    var scene, camera, renderer;
+
+
+    var woodBox, records, recordBox;
+
+    var targetList = [];
+
+    var paulSimon;
+
+    var BOX_SIZE = 20;
+
+    // Set up some init function (I like to call it when the window loads)
+    window.onload = function() {
+        //Basic scene stuff
+        sceneSetup();
+        box = boxSetup(20);
+        records = addRecords(20);
+
+        woodBox = boxSetup(BOX_SIZE);
+        records = addRecords(BOX_SIZE);
+        recordBox = new THREE.Group();
+        recordBox.add(woodBox, records);
+        scene.add(recordBox);
+
+        var light = new THREE.AmbientLight( 0x404040, 4 ); // soft white light
+        scene.add( light );
+
+        // Now, set up a loop function for animation
+        requestAnimationFrame( animate );
+
+        swipedetect();
+    }
+
+    function animate() {
+        renderer.autoClear = false;
+        renderer.clear();
+        renderer.render( scene, camera );
+
+        // Tell our function to loop again on the next frame
+        requestAnimationFrame( animate );
+    }
+
+    function sceneSetup(){
+        // Create a basic scene
+        scene = new THREE.Scene();
+
+        // Create a basic perspective camera
+        var aspectRatio = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(70, aspectRatio);
+        camera.position.z = 30;
+        camera.position.y = 45;
+        camera.lookAt( scene.position );
+
+        // Create a WebGL renderer
+        renderer = new THREE.WebGLRenderer({ alpha: true });
+        // Set it to the size of our window
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        // Attach it to the body HTML element
+        document.body.appendChild( renderer.domElement );
+    }
+
+
+
+
+    </script>
+  </body>
+</html>

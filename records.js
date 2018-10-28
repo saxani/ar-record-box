@@ -1,40 +1,43 @@
 //Would like to get rid of this here but easier for moving records
 
-var nextSwipedAlbumUp;
-var nextSwipedAlbumDown;
-var record1, record2;
+var numOfAlbums = 5;
+var record = new Array(numOfAlbums);
+
+var nextSwipedAlbumUp = null;
+var nextSwipedAlbumDown = numOfAlbums - 1;
 
 function addRecords(boxSize) {
 
   var recordGeometry = new THREE.BoxGeometry(boxSize/1.1, boxSize/1.1, boxSize/40);
 
 
-  // Create an album - Graceland
-  var record1Texture = new THREE.TextureLoader().load("./assets/graceland_cover.jpg");
-  var record1Material = new THREE.MeshPhongMaterial({ map: record1Texture });
-  record1 = new THREE.Object3D();
-  record1.position.z = -boxSize/2.3;
-  var record1Mesh = new THREE.Mesh(recordGeometry, record1Material);
-  record1.add(record1Mesh);
-
-  //Create an album - Rumors
-  var record2Texture = new THREE.TextureLoader().load("./assets/born_cover.jpg");
-  var record2Material = new THREE.MeshPhongMaterial({ map: record2Texture });
-  record2 = new THREE.Object3D();
-  record2.position.z = -boxSize/2.5;
-  var record2Mesh = new THREE.Mesh(recordGeometry, record2Material);
-  record2.add(record2Mesh);
-
-
-  nextSwipedAlbumUp = null;
-  nextSwipedAlbumDown = record2;
-
+  var recordTexture = new Array(numOfAlbums);
+  var recordMaterial = new Array(numOfAlbums);
+  var recordMesh = new Array(numOfAlbums);
+  var boxOffset = 2.3;
+  var albumCoverKeys = ['graceland', 'born', 'rumours', 'abbey', 'london'];
   recordGroup = new THREE.Group();
-  recordGroup.add(record1, record2);
+
+  for (var i = 0; i < numOfAlbums; i++) {
+
+    recordTexture[i] = new THREE.TextureLoader().load("./assets/" + albumCoverKeys[i] + "_cover.jpg");
+    recordMaterial[i] = new THREE.MeshPhongMaterial({ map: recordTexture[i]});
+    record[i] = new THREE.Object3D();
+    record[i].position.z = -boxSize/boxOffset;
+    recordMesh[i] = new THREE.Mesh(recordGeometry, recordMaterial[i]);
+    record[i].add(recordMesh[i]);
+    recordGroup.add(record[i]);
+    targetList.push(record[i]);
+
+    boxOffset += 0.2;
+
+    console.log(record[i]);
+  }
+
 
   return recordGroup;
 
-  targetList.push(record1);
+
   // paulSimon = record1.uuid;
   // console.log(paulSimon);
 
@@ -55,19 +58,35 @@ function addRecords(boxSize) {
 
         if (intersects.length > 0) {
             selectedObject = intersects[0];
-            console.log(selectedObject);
-
-            if(selectedObject.object.parent.uuid == paulSimon) {
-                alert('load paul simon');
-            }
+            console.log(intersects.length);
         }
     }
 
     function nextAlbum () {
-        nextSwipedAlbumDown.position.z += BOX_SIZE / 1.2;
-        nextSwipedAlbumDown = record1;
+        if(nextSwipedAlbumDown) {
+          nextSwipedAlbumUp = nextSwipedAlbumDown;
+          record[nextSwipedAlbumDown].position.z += BOX_SIZE / 1.3;
+        }
+
+        nextSwipedAlbumDown --;
+
+        if(nextSwipedAlbumDown < 0) {
+          record[0].position.z += BOX_SIZE / 1.3;
+          nextSwipedAlbumDown = null;
+          nextSwipedAlbumUp = 0;
+        }
     }
 
     function previousAlbum () {
-        nextSwipedAlbumUp.position.z =- BOX_SIZE / 1.2;
+        if(nextSwipedAlbumUp) {
+          nextSwipedAlbumDown = nextSwipedAlbumUp;
+          record[nextSwipedAlbumUp].position.z -= BOX_SIZE / 1.3;
+        }
+
+        nextSwipedAlbumUp ++;
+
+        if(nextSwipedAlbumUp > (numOfAlbums - 1)) {
+          nextSwipedAlbumUp = null;
+          nextSwipedAlbumDown = numOfAlbums - 1;
+        }
     }
