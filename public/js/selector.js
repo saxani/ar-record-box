@@ -10,26 +10,6 @@ function swipedetect(){
    elapsedTime,
    startTime;
 
-
-   function mouseStarted(e) {
-       startY = e.clientY;
-   }
-
-   function mouseEnded(e) {
-       var endY  = e.clientY;
-
-       if (endY > startY) {
-           nextAlbum();
-       } else if (endY < startY) {
-           previousAlbum();
-       } else {
-           selectAlbum(e);
-       }
-   }
-
-   touchsurface.addEventListener('mousedown', mouseStarted);
-   touchsurface.addEventListener('mouseup', mouseEnded);
-
    touchsurface.addEventListener('touchstart', function(e){
        var touchobj = e.changedTouches[0]
        swipedir = 'none'

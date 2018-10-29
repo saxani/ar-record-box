@@ -1,23 +1,11 @@
-<!--
-/*
- * Copyright 2017 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
--->
+<!-- The starting point for this project came from https://github.com/google-ar/three.ar.js/blob/master/examples/spawn-at-surface.html -->
+<!-- Getting the Spotify API working came largely from https://github.com/spotify/web-api-auth-examples/tree/master/authorization_code -->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>three.ar.js - Spawn at Surface</title>
+  <title>Record Box</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -52,7 +40,7 @@
       position: absolute;
       visibility: hidden;
       left: 50%;
-      top: 0;
+      top: 20px;
       z-index: 20;
       transform: translate(-50%, 0);
     }
@@ -74,6 +62,7 @@
 <div id="info">
   Tap to place your record player on a surface.
 </div>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="./js/three.js/three.js"></script>
 <script src="./js/three.js/VRControls.js"></script>
 <script src="./js/three.ar.js"></script>
@@ -110,16 +99,18 @@ var BOX_SIZE = 0.2;
 THREE.ARUtils.getARDisplay().then(function (display) {
   if (display) {
     vrDisplay = display;
-    init();
+    addRecords(BOX_SIZE).then(
+      function(recordsGroup){
+        records = recordGroup;
+        init();
+      }
+    );
   } else {
     THREE.ARUtils.displayUnsupportedMessage();
   }
 });
 
 function init() {
-  // Turn on the debugging panel
-  // var arDebug = new THREE.ARDebug(vrDisplay);
-  // document.body.appendChild(arDebug.getElement());
 
   // Setup the three.js rendering environment
   renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -135,11 +126,7 @@ function init() {
   // scene
   arView = new THREE.ARView(vrDisplay, renderer);
 
-  // The ARPerspectiveCamera is very similar to THREE.PerspectiveCamera,
-  // except when using an AR-capable browser, the camera uses
-  // the projection matrix provided from the device, so that the
-  // perspective camera's depth planes and field of view matches
-  // the physical camera on the device.
+  // The ARPerspectiveCamera is very similar to THREE.PerspectiveCamera
   camera = new THREE.ARPerspectiveCamera(
     vrDisplay,
     60,
@@ -158,30 +145,17 @@ function init() {
   scene.add(directionalLight);
 
 
-
   woodBox = boxSetup(BOX_SIZE);
-  records = addRecords(BOX_SIZE);
+
   recordBox = new THREE.Group();
   recordBox.add(woodBox, records);
   recordBox.position.set(10000, 10000, 10000);
   scene.add(recordBox);
 
-
-
   // VRControls is a utility from three.js that applies the device's
   // orientation/position to the perspective camera, keeping our
   // real world and virtual world in sync.
   vrControls = new THREE.VRControls(camera);
-
-  // Shift the cube geometry vertices upwards, so that the "pivot" of
-  // the cube is at it's base. When the cube is added to the scene,
-  // this will help make it appear to be sitting on top of the real-
-  // world surface.
-  // geometry.applyMatrix( new THREE.Matrix4().setTranslation( 0, BOX_SIZE / 2, 0 ) );
-  // geometry.translate( 0, BOX_SIZE / 2, 0 );
-  // var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
-  // cube = new THREE.Mesh(geometry, material);
-
 
   // Bind our event handlers
   window.addEventListener('resize', onWindowResize, false);
